@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/njhanley/nbt"
 )
@@ -61,30 +62,25 @@ func closeIO(c io.Closer, name string) {
 	}
 }
 
-func readMap(filename string) *Map {
+func readMap(filename string) (*Map, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		fatal(filename, err)
+		return nil, err
 	}
 	defer closeIO(file, filename)
 
 	r, err := gzip.NewReader(file)
 	if err != nil {
-		fatal(filename, err)
+		return nil, err
 	}
 	defer closeIO(r, filename)
 
 	tag, err := nbt.NewDecoder(r).Decode()
 	if err != nil {
-		fatal(filename, err)
+		return nil, err
 	}
 
-	m, err := NewMap(tag)
-	if err != nil {
-		fatal(filename, err)
-	}
-
-	return m
+	return NewMap(tag)
 }
 
 func render(a []*Map) image.Image {
@@ -110,11 +106,32 @@ func main() {
 
 	flag.Parse()
 
-	maps := make([]*Map, flag.NArg())
-	for i, filename := range flag.Args() {
-		m := readMap(filename)
-		if m.Dimension == Overworld {
-			maps[i] = m
+	var maps []*Map
+	for _, filename := range flag.Args() {
+		if err := filepath.Walk(filename, func(path string, fi os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if fi.IsDir() {
+				if path == filename {
+					return nil
+				}
+				return filepath.SkipDir
+			}
+
+			m, err := readMap(path)
+			if err != nil {
+				return err
+			}
+
+			if m.Dimension == Overworld {
+				maps = append(maps, m)
+			}
+
+			return nil
+		}); err != nil {
+			fatal(filename, err)
 		}
 	}
 
