@@ -44,26 +44,25 @@ func handleExit() {
 	}
 }
 
-func info(prefix string, v interface{}) {
-	if e, ok := v.(*os.PathError); ok {
-		v = e.Err
-	}
-
-	if options.verbose {
-		fmt.Fprintf(os.Stderr, "%s: %+v\n", prefix, v)
-	} else {
-		fmt.Fprintf(os.Stderr, "%s: %v\n", prefix, v)
-	}
+func stderrf(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, format, a...)
 }
 
-func fatal(prefix string, v interface{}) {
-	info(prefix, v)
+func fatalf(format string, a ...interface{}) {
+	stderrf(format, a...)
 	exit(1)
+}
+
+func unwrapPathError(err error) error {
+	if e, ok := err.(*os.PathError); ok {
+		return e.Err
+	}
+	return err
 }
 
 func closeIO(c io.Closer, name string) {
 	if err := c.Close(); err != nil {
-		fatal(name, err)
+		fatalf("%s: %v\n", name, unwrapPathError(err))
 	}
 }
 
@@ -151,13 +150,13 @@ func main() {
 
 			return nil
 		}); err != nil {
-			fatal(filename, err)
+			fatalf("%s: %v\n", filename, unwrapPathError(err))
 		}
 	}
 
 	img := render(maps)
 
 	if err := writePNG(options.outfile, img); err != nil {
-		fatal(options.outfile, err)
+		fatalf("%s: %v\n", options.outfile, unwrapPathError(err))
 	}
 }
