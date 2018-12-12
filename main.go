@@ -22,6 +22,11 @@ var options struct {
 func init() {
 	flag.StringVar(&options.outfile, "o", "out.png", "output filename")
 	flag.BoolVar(&options.verbose, "v", false, "verbose mode")
+
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "usage: %s [flags] path [path ...]\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 }
 
 type exitCode int
