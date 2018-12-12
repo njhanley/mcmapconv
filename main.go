@@ -111,6 +111,11 @@ func main() {
 
 	flag.Parse()
 
+	if flag.NArg() == 0 {
+		flag.Usage()
+		exit(2)
+	}
+
 	var maps []*Map
 	for _, filename := range flag.Args() {
 		if err := filepath.Walk(filename, func(path string, fi os.FileInfo, err error) error {
