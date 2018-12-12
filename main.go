@@ -60,24 +60,24 @@ func unwrapPathError(err error) error {
 	return err
 }
 
-func closeIO(c io.Closer, name string) {
-	if err := c.Close(); err != nil {
-		fatalf("%s: %v\n", name, unwrapPathError(err))
+func closeIO(c io.Closer, err *error) {
+	if e := c.Close(); e != nil && *err == nil {
+		*err = e
 	}
 }
 
-func readMap(filename string) (*Map, error) {
+func readMap(filename string) (m *Map, err error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer closeIO(file, filename)
+	defer closeIO(file, &err)
 
 	r, err := gzip.NewReader(file)
 	if err != nil {
 		return nil, err
 	}
-	defer closeIO(r, filename)
+	defer closeIO(r, &err)
 
 	tag, err := nbt.NewDecoder(r).Decode()
 	if err != nil {
@@ -105,12 +105,12 @@ func render(a []*Map) image.Image {
 	return canvas
 }
 
-func writePNG(filename string, img image.Image) error {
+func writePNG(filename string, img image.Image) (err error) {
 	out, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
-	defer closeIO(out, filename)
+	defer closeIO(out, &err)
 
 	return png.Encode(out, img)
 }
