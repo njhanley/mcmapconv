@@ -106,6 +106,16 @@ func render(a []*Map) image.Image {
 	return canvas
 }
 
+func writePNG(filename string, img image.Image) error {
+	out, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer closeIO(out, filename)
+
+	return png.Encode(out, img)
+}
+
 func main() {
 	defer handleExit()
 
@@ -147,13 +157,7 @@ func main() {
 
 	img := render(maps)
 
-	out, err := os.Create(options.outfile)
-	if err != nil {
-		fatal(options.outfile, err)
-	}
-	defer closeIO(out, options.outfile)
-
-	if err := png.Encode(out, img); err != nil {
+	if err := writePNG(options.outfile, img); err != nil {
 		fatal(options.outfile, err)
 	}
 }
