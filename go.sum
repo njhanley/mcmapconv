@@ -1,0 +1,4 @@
+github.com/njhanley/nbt v0.0.0-20191229003051-84e47bb3fca2 h1:8wX5Vejjfl7ZLIyI8i8Gf4P34g/6wjPfdiNjhTsEpEk=
+github.com/njhanley/nbt v0.0.0-20191229003051-84e47bb3fca2/go.mod h1:1LzV20nMqTxRxTDfsFGuvAsFKjZwU6mOJlNx666p5NE=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
